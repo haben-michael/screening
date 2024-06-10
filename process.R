@@ -24,25 +24,6 @@ powers <- as.data.frame(do.call(rbind,powers))
 powers <- powers[order(powers$n,powers$rZ.idx,powers$Z.param),]
 
 
-## figure
-
-powers <- subset(powers,theta==0.2 & pb.alpha==.05)
-
-ns <- unique(powers$n)
-op <- par(mfrow=c(length(ns),length(unique(powers$rZ.idx))))
-for(n0 in ns) {
-    for(rZ.idx0 in unique(powers$rZ.idx)) {
-        with(list(powers=subset(powers,rZ.idx==rZ.idx0 & n==n0)), {
-            plot(powers$Z.param,powers$unconditional,ylim=range(subset(powers,select=c('begg','egger','unconditional'))),type='l')    
-            lines(powers$Z.param,powers$egger,col=2)
-            lines(powers$Z.param,powers$begg,col=3)
-        })
-    }
-}
-par(op)
-
-
-
 ## table
 
 rZ.idxs <- 1:3
@@ -68,10 +49,20 @@ for(theta0 in c(0,.2)) {
     out <- round(ftable(out,row.vars=c(2,4,5),col.vars=c(3,1)),3)
     out <- xtableFtable(out,method='compact')
     sink(paste0('power_',theta0,'.tex'))
-    attr(out,'col.vars')$rZ.idx <- c('t','power','beta')
+    ## attr(out,'col.vars')$rZ.idx <- c('t','power','beta')
+    attr(out,'col.vars')$rZ.idx <- c('t','Power','Beta')
+    attr(out,'row.vars')$condition <- unname(sapply(attr(out,'row.vars')$condition ,function(str)paste0(toupper(substr(str,1,1)),substr(str,2,nchar(str)))))
     names(attr(out,'col.vars')) <- c('$f_Z$','$\\zeta$')
+    names(attr(out,'row.vars'))[names(attr(out,'row.vars'))=='condition'] <- 'Condition'
     names(attr(out,'row.vars'))[names(attr(out,'row.vars'))=='pb.alpha'] <- '$\\alpha_0$'
     print.xtableFtable(out,floating=FALSE,latex.environment=NULL)
     sink()
 }
+
+
+
+
+
+
+
 
